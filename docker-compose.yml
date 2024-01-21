@@ -1,0 +1,24 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass_123
+      POSTGRES_DB: mydatabase
+    volumes:
+      - ./data:/var/lib/postgresql/data
+  spark-master:
+    image: spark
+    depends_on:
+      - postgres
+    volumes:
+      - ./my_spark.py:/my_spark.py
+  spark-worker1:
+    image: spark
+    depends_on:
+      - spark-master
+  spark-worker2:
+    image: spark
+    depends_on:
+      - spark-master
