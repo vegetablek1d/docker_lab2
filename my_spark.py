@@ -1,40 +1,22 @@
 from pyspark.sql import SparkSession
 
-# Создание сессии Spark
 spark = SparkSession.builder \
-    .appName("Data Processing") \
+    .appName("House Prices Analysis") \
     .getOrCreate()
 
-# Подключение к БД PostgreSQL
-jdbc_url = "jdbc:postgresql://postgres:5432/mydatabase"
-connection_properties = {
-    "user": "user",
-    "password": "pass_123",
-    "driver": "org.postgresql.Driver"
-}
-
-# Загрузка данных из таблиц БД
-df_googleplaystore = spark.read \
+# Загрузка данных из PostgreSQL
+df = spark.read \
     .format("jdbc") \
-    .option("url", jdbc_url) \
-    .option("dbtable", "googleplaystore") \
-    .option("properties", connection_properties) \
+    .option("url", "jdbc:postgresql://postgres:5432/mydb") \
+    .option("dbtable", "house_prices") \
+    .option("user", "myuser") \
+    .option("password", "mypassword") \
     .load()
 
-df_googleplaystore_user_reviews = spark.read \
-    .format("jdbc") \
-    .option("url", jdbc_url) \
-    .option("dbtable", "googleplaystore_user_reviews") \
-    .option("properties", connection_properties) \
-    .load()
+# Выполнение анализа данных
+result = df.groupBy("район", "количество_комнат") \
+    .avg("стоимость") \
+    .orderBy("район", "количество_комнат")
 
-# Обработка данных и вывод результатов
-df_result = df_googleplaystore \
-    .join(df_googleplaystore_user_reviews, "category") \
-    .groupBy("category") \
-    .agg(
-        sum("positive_reviews").alias("total_positive_reviews"),
-        sum("negative_reviews").alias("total_negative_reviews")
-    )
-
-df_result.show()
+# Вывод результатов
+result.show()
