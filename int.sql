@@ -12,7 +12,7 @@ CREATE TABLE googleplaystore (
     genres VARCHAR(255),
     last_update VARCHAR(255),
     current_ver VARCHAR(255),
-    android_ver VARCHAR(255),
+    android_ver VARCHAR(255)
 );
 CREATE TABLE googleplaystore_user_reviews(
     id SERIAL PRIMARY KEY,
@@ -20,7 +20,7 @@ CREATE TABLE googleplaystore_user_reviews(
     translated_review VARCHAR(255),
     sentiment VARCHAR(255),
     sentiment_Polarity FLOAT,
-    sentiment_subjectivity FLOAT;
+    sentiment_subjectivity FLOAT
 );
 
 COPY googleplaystore
