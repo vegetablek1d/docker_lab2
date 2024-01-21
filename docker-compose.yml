@@ -1,28 +1,24 @@
 version: '3'
 services:
   postgres:
-    image: postgres
+    image: postgres:16-alpine
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
     volumes:
       - ./data:/var/lib/postgresql/data
-
   spark-master:
-    image: spark
-    command: bin/spark-class org.apache.spark.deploy.master.Master
+    image: bitnami/spark
     ports:
       - 8080:8080
-
+    depends_on:
+      - postgres
   spark-worker1:
-    image: spark
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    image: bitnami/spark
     depends_on:
       - spark-master
-
   spark-worker2:
-    image: spark
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    image: bitnami/spark
     depends_on:
       - spark-master
