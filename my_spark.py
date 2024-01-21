@@ -1,22 +1,30 @@
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, avg
 
+# Создание Spark сессии
 spark = SparkSession.builder \
-    .appName("House Prices Analysis") \
+    .appName("HousePricesAnalysis") \
+    .config("spark.driver.extraClassPath", "/opt/bitnami/spark/jars/postgresql-42.7.0.jar") \
     .getOrCreate()
 
-# Загрузка данных из PostgreSQL
-df = spark.read \
-    .format("jdbc") \
-    .option("url", "jdbc:postgresql://postgres:5432/mydb") \
-    .option("dbtable", "house_prices") \
-    .option("user", "myuser") \
-    .option("password", "mypassword") \
-    .load()
+# Загрузка данных из PostgreSQL таблицы
+jdbc_url = "jdbc:postgresql://postgres:5432/mydb"
+connection_properties = {
+    "user": "myuser",
+    "password": "mypassword",
+    "driver": "org.postgresql.Driver"
+}
+
+house_prices_df = spark.read \
+    .jdbc(url=jdbc_url, table="house_prices", properties=connection_properties)
 
 # Выполнение анализа данных
-result = df.groupBy("район", "количество_комнат") \
-    .avg("стоимость") \
-    .orderBy("район", "количество_комнат")
+result_df = house_prices_df.groupBy("location", "bedrooms") \
+    .agg(avg("price").alias("avg_price")) \
+    .orderBy("location", "bedrooms")
 
 # Вывод результатов
-result.show()
+result_df.show()
+
+# Завершение Spark сессии
+spark.stop()
