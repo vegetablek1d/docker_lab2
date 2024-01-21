@@ -1,24 +1,40 @@
 version: '3'
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:latest
     environment:
+      POSTGRES_DB: db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
-    volumes:
-      - ./data:/var/lib/postgresql/data
-  spark-master:
-    image: bitnami/spark
     ports:
-      - 8080:8080
+      - "5432:5432"
+    volumes:
+      - ./data:/var/lib/postgresql_house_prices/data
+
+  spark-master:
+    image: bitnami/spark:latest
+    environment:
+      -POSTGRES_HOST: postgres
+      -POSTGRES_PORT: 5432
+      -POSTGRES_DB: db
+      -POSTGRES_USER: user
+      -POSTGRES_PASSWORD: password
+    ports:
+      - "7077:7077"
+      - "8080:8080"
     depends_on:
       - postgres
+
   spark-worker1:
-    image: bitnami/spark
+    image: bitnami/spark:latest
+    environment:
+      -SPARK_MASTER_HOST: spark-master
     depends_on:
       - spark-master
+
   spark-worker2:
-    image: bitnami/spark
+    image: bitnami/spark:latest
+    environment:
+      -SPARK_MASTER_HOST: spark-master
     depends_on:
       - spark-master
