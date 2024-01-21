@@ -1,16 +1,28 @@
 version: '3'
 services:
-  db:
+  postgres:
     image: postgres
-    restart: always
     environment:
-      POSTGRES_USER: your_username
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database_name
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
     volumes:
       - ./data:/var/lib/postgresql/data
-  adminer:
-    image: adminer
-    restart: always
+
+  spark-master:
+    image: spark
+    command: bin/spark-class org.apache.spark.deploy.master.Master
     ports:
       - 8080:8080
+
+  spark-worker1:
+    image: spark
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+
+  spark-worker2:
+    image: spark
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
