@@ -3,22 +3,29 @@ services:
   postgres:
     image: postgres
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass_123
-      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
     volumes:
       - ./data:/var/lib/postgresql/data
   spark-master:
     image: spark
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
     depends_on:
       - postgres
-    volumes:
-      - ./my_spark.py:/my_spark.py
   spark-worker1:
     image: spark
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
     depends_on:
       - spark-master
   spark-worker2:
     image: spark
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
     depends_on:
       - spark-master
